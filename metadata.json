@@ -1,0 +1,5 @@
+{
+  "name": "Japan Travel Planner",
+  "description": "A comprehensive React application for planning a 1-month trip to Kyoto and Fukuoka, featuring an interactive itinerary, budget calculator, map integration, and an AI-powered travel assistant.",
+  "requestFramePermissions": []
+}
