@@ -1,5 +1,5 @@
-import React from 'react';
-import { Clock, Ticket, Pencil, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Clock, Ticket, Pencil, Trash2, RotateCcw } from 'lucide-react';
 import { ItineraryItem } from '../../types';
 
 interface ItineraryCardProps {
@@ -10,7 +10,13 @@ interface ItineraryCardProps {
 }
 
 export const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, onEdit, onDelete, onClick }) => {
+    const [mapKey, setMapKey] = useState(0);
     const mapSrc = `https://maps.google.com/maps?q=${item.mapQuery}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+
+    const handleResetMap = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setMapKey(prev => prev + 1);
+    };
 
     return (
         <div className="relative z-10 flex gap-4 group">
@@ -55,7 +61,21 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, onEdit, onDe
                     </div>
                     {/* Map Side */}
                     <div className="relative min-h-[300px] h-full bg-gray-100 border-t lg:border-t-0 lg:border-l border-gray-200">
-                        <iframe className="absolute inset-0 w-full h-full" frameBorder="0" scrolling="no" src={mapSrc} title="Map"></iframe>
+                        <iframe
+                            key={mapKey}
+                            className="absolute inset-0 w-full h-full"
+                            frameBorder="0"
+                            scrolling="no"
+                            src={mapSrc}
+                            title="Map"
+                        ></iframe>
+                        <button
+                            onClick={handleResetMap}
+                            className="absolute top-2 right-2 bg-white/90 p-2 rounded-md shadow-md hover:bg-white text-gray-600 hover:text-red-600 transition z-10"
+                            title="Reset Map View"
+                        >
+                            <RotateCcw className="w-4 h-4" />
+                        </button>
                     </div>
                 </div>
             </div>
