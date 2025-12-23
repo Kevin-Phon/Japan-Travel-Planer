@@ -12,18 +12,6 @@ export const Header: React.FC = () => {
             </div>
 
             <div className="relative z-10 max-w-4xl mx-auto">
-                <button
-                    onClick={() => {
-                        const kyoto = localStorage.getItem('kyoto-items');
-                        const fukuoka = localStorage.getItem('fukuoka-items');
-                        const exportData = `Kyoto:\n${kyoto}\n\nFukuoka:\n${fukuoka}`;
-                        navigator.clipboard.writeText(exportData);
-                        alert("Data copied to clipboard! Please paste it into the chat.");
-                    }}
-                    className="absolute top-0 right-0 bg-white/10 hover:bg-white/20 text-white text-xs px-3 py-1 rounded-full backdrop-blur-sm transition"
-                >
-                    Export Data
-                </button>
                 <div className="flex justify-center mb-4">
                     <Plane className="w-12 h-12" />
                 </div>

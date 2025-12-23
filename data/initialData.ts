@@ -87,6 +87,31 @@ export const initialKyotoData: ItineraryItem[] = [
         "See the Great Buddha (Daibutsu) at Todai-ji Temple."
       ]
     }
+  },
+  {
+    id: "1766452188178",
+    day: "4 - 7",
+    time: "8:00 - 17:00",
+    title: "Beginning of Osaka",
+    description: "Walk around the city and  famous places",
+    image: "https://cdn.cheapoguides.com/wp-content/uploads/sites/3/2020/06/osaka-dotonbori-iStock-1138049211-1024x683.jpg",
+    cost: "Various",
+    mapQuery: "Osaka",
+    hiddenGemId: "gem-1766452188178",
+    details: {
+      overview: "Osaka is known for its modern architecture, nightlife and hearty street food.",
+      food: {
+        title: "Osaka Street Food",
+        desc: "Try Takoyaki and Okonomiyaki.",
+        img: "https://photos.smugmug.com/Osaka/Osaka-Categories/i-zqxSZHf/0/L/Osaka_Restaurants-L.jpg"
+      },
+      activity: {
+        title: "City Exploration",
+        desc: "Visit Dotonbori and Osaka Castle.",
+        img: "https://viva-holidays.co.uk/_next/image/?url=https%3A%2F%2Fapi.viva-holidays.co.uk%2Fimages%2F_tok_oas.png&w=3840&q=75"
+      },
+      mustDos: []
+    }
   }
 ];
 
