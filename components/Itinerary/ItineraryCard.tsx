@@ -71,7 +71,7 @@ export const ItineraryCard: React.FC<ItineraryCardProps> = ({ item, onEdit, onDe
                         ></iframe>
                         <button
                             onClick={handleResetMap}
-                            className="absolute top-2 right-2 bg-white/90 p-2 rounded-md shadow-md hover:bg-white text-gray-600 hover:text-red-600 transition z-10"
+                            className="absolute top-2 left-2 bg-white/90 p-2 rounded-md shadow-md hover:bg-white text-gray-600 hover:text-red-600 transition z-10"
                             title="Reset Map View"
                         >
                             <RotateCcw className="w-4 h-4" />
