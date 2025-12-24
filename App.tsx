@@ -1,3 +1,4 @@
+```typescript
 import React, { useState } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { Header } from './components/Layout/Header';
@@ -5,12 +6,13 @@ import { Navigation } from './components/Layout/Navigation';
 import { ItineraryList } from './components/Itinerary/ItineraryList';
 import { BudgetPlanner } from './components/Details/BudgetPlanner';
 import { TravelTips } from './components/Details/TravelTips';
+import { PackingList } from './components/Details/PackingList';
 import { DetailModal } from './components/Modals/DetailModal';
 import { ActivityModal } from './components/Modals/ActivityModal';
 import { AiAssistant } from './components/AiAssistant/AiAssistant';
 import { initialKyotoData, initialFukuokaData } from './data/initialData';
 import { ItineraryItem, TabType } from './types';
-import { Map, MapPin } from 'lucide-react';
+import { Plane, Calendar, MapPin, MessageCircle, Wallet, Backpack } from 'lucide-react';
 
 const App: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('kyoto');
@@ -57,7 +59,7 @@ const App: React.FC = () => {
                 const newItem = {
                     ...itemData,
                     id: Date.now().toString(),
-                    hiddenGemId: `gem-${Date.now()}`
+                    hiddenGemId: `gem - ${ Date.now() } `
                 } as ItineraryItem;
                 // Simple sort by day if possible (naive check)
                 const newList = [...prev, newItem];
@@ -136,25 +138,31 @@ const App: React.FC = () => {
                                     <a
                                         key={idx}
                                         href={`https://www.google.com/maps/search/?api=1&query=${link.query}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-red-50 hover:text-red-600 transition"
-                                    >
-                                        <MapPin className="w-4 h-4" /> {link.name}
-                                    </a>
+target = "_blank"
+rel = "noreferrer"
+className = "flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-red-50 hover:text-red-600 transition"
+    >
+    <MapPin className="w-4 h-4" /> { link.name }
+                                    </a >
                                 ))}
-                            </div>
-                        </div>
-                    </div>
+                            </div >
+                        </div >
+                    </div >
                 )}
-            </main>
 
-            <footer className="bg-gray-800 text-gray-400 py-8 text-center mt-auto">
-                <p className="mb-2">Japan Trip Planner • Kyoto & Fukuoka</p>
-                <p className="text-xs opacity-50">Refactored to React + Vite</p>
-            </footer>
+{
+    activeTab === 'checklist' && (
+        <PackingList />
+    )
+}
+            </main >
 
-            {/* Modals */}
+    <footer className="bg-gray-800 text-gray-400 py-8 text-center mt-auto">
+        <p className="mb-2">Japan Trip Planner • Kyoto & Fukuoka</p>
+        <p className="text-xs opacity-50">Refactored to React + Vite</p>
+    </footer>
+
+{/* Modals */ }
             <DetailModal
                 isOpen={!!detailItem}
                 item={detailItem}
@@ -171,7 +179,7 @@ const App: React.FC = () => {
             />
 
             <AiAssistant />
-        </div>
+        </div >
     );
 };
 
