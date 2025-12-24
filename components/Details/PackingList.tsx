@@ -93,41 +93,75 @@ export const PackingList: React.FC = () => {
                     </form>
 
                     {/* List */}
+                    {/* List */}
                     <div className="space-y-3">
                         {items.length === 0 && (
                             <div className="text-center py-8 text-gray-400">
                                 Your bag is empty! Add items above.
                             </div>
                         )}
-                        {items.map(item => (
-                            <div
-                                key={item.id}
-                                className={`flex items-center justify-between p-4 rounded-xl border transition group ${item.checked
-                                        ? 'bg-green-50 border-green-200'
-                                        : 'bg-white border-gray-100 hover:border-red-200 hover:shadow-sm'
-                                    }`}
-                            >
+
+                        {/* Active Items */}
+                        <div className="space-y-3">
+                            {items.filter(i => !i.checked).map(item => (
                                 <div
-                                    onClick={() => toggleItem(item.id)}
-                                    className="flex items-center gap-4 cursor-pointer flex-grow"
+                                    key={item.id}
+                                    className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white hover:border-red-200 hover:shadow-sm transition group"
                                 >
-                                    <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition ${item.checked ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300'
-                                        }`}>
-                                        {item.checked && <CheckSquare className="w-4 h-4" />}
+                                    <div
+                                        onClick={() => toggleItem(item.id)}
+                                        className="flex items-center gap-4 cursor-pointer flex-grow"
+                                    >
+                                        <div className="w-6 h-6 rounded border-2 border-gray-300 flex items-center justify-center transition hover:border-red-400">
+                                        </div>
+                                        <span className="font-medium text-gray-700">
+                                            {item.text}
+                                        </span>
                                     </div>
-                                    <span className={`font-medium ${item.checked ? 'text-green-800 line-through opacity-70' : 'text-gray-700'}`}>
-                                        {item.text}
-                                    </span>
+                                    <button
+                                        onClick={() => deleteItem(item.id)}
+                                        className="text-gray-400 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition"
+                                        title="Remove item"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
-                                <button
-                                    onClick={() => deleteItem(item.id)}
-                                    className="text-gray-400 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition"
-                                    title="Remove item"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
+                            ))}
+                        </div>
+
+                        {/* Completed Items */}
+                        {items.some(i => i.checked) && (
+                            <div className="mt-8">
+                                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 pl-2">Packed & Ready</h3>
+                                <div className="space-y-2 opacity-60">
+                                    {items.filter(i => i.checked).map(item => (
+                                        <div
+                                            key={item.id}
+                                            className="flex items-center justify-between p-3 rounded-xl border border-green-100 bg-green-50 transition"
+                                        >
+                                            <div
+                                                onClick={() => toggleItem(item.id)}
+                                                className="flex items-center gap-4 cursor-pointer flex-grow"
+                                            >
+                                                <div className="w-6 h-6 rounded border-2 bg-green-500 border-green-500 flex items-center justify-center text-white">
+                                                    <CheckSquare className="w-4 h-4" />
+                                                </div>
+                                                <span className="font-medium text-green-800 line-through">
+                                                    {item.text}
+                                                </span>
+                                            </div>
+                                            <button
+                                                onClick={() => deleteItem(item.id)}
+                                                className="text-gray-400 hover:text-red-500 p-2 transition"
+                                                title="Remove item"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        ))}
+                        )}
                     </div>
                 </div>
             </div>
