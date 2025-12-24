@@ -48,7 +48,7 @@ export const PackingList: React.FC = () => {
     const progress = Math.round((items.filter(i => i.checked).length / items.length) * 100) || 0;
 
     return (
-        <div className="max-w-2xl mx-auto p-6 md:p-8 animate-fade-in text-left">
+        <div className="max-w-5xl mx-auto p-6 md:p-8 animate-fade-in text-left">
             <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-red-100">
                 <div className="bg-gradient-to-r from-red-600 to-red-500 p-6 text-white flex justify-between items-center">
                     <div className="flex items-center gap-3">
@@ -95,7 +95,7 @@ export const PackingList: React.FC = () => {
                     {/* List */}
                     {/* List */}
                     {/* List Grid */}
-                    <div className="grid md:grid-cols-2 gap-8">
+                    <div className="grid md:grid-cols-2 gap-8 items-start">
                         {/* Column 1: Active Items */}
                         <div className="space-y-4">
                             <h3 className="font-bold text-gray-700 flex items-center gap-2">
