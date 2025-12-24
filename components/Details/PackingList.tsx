@@ -94,74 +94,94 @@ export const PackingList: React.FC = () => {
 
                     {/* List */}
                     {/* List */}
-                    <div className="space-y-3">
-                        {items.length === 0 && (
-                            <div className="text-center py-8 text-gray-400">
-                                Your bag is empty! Add items above.
-                            </div>
-                        )}
+                    {/* List Grid */}
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {/* Column 1: Active Items */}
+                        <div className="space-y-4">
+                            <h3 className="font-bold text-gray-700 flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                                To Pack
+                            </h3>
 
-                        {/* Active Items */}
-                        <div className="space-y-3">
-                            {items.filter(i => !i.checked).map(item => (
-                                <div
-                                    key={item.id}
-                                    className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white hover:border-red-200 hover:shadow-sm transition group"
-                                >
-                                    <div
-                                        onClick={() => toggleItem(item.id)}
-                                        className="flex items-center gap-4 cursor-pointer flex-grow"
-                                    >
-                                        <div className="w-6 h-6 rounded border-2 border-gray-300 flex items-center justify-center transition hover:border-red-400">
-                                        </div>
-                                        <span className="font-medium text-gray-700">
-                                            {item.text}
-                                        </span>
-                                    </div>
-                                    <button
-                                        onClick={() => deleteItem(item.id)}
-                                        className="text-gray-400 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition"
-                                        title="Remove item"
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                            {items.length === 0 && (
+                                <div className="text-center py-8 text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
+                                    Your bag is empty! Add items above.
                                 </div>
-                            ))}
+                            )}
+
+                            <div className="space-y-3">
+                                {items.filter(i => !i.checked).map(item => (
+                                    <div
+                                        key={item.id}
+                                        className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white hover:border-red-200 hover:shadow-sm transition group"
+                                    >
+                                        <div
+                                            onClick={() => toggleItem(item.id)}
+                                            className="flex items-center gap-4 cursor-pointer flex-grow"
+                                        >
+                                            <div className="w-6 h-6 rounded border-2 border-gray-300 flex items-center justify-center transition hover:border-red-400">
+                                            </div>
+                                            <span className="font-medium text-gray-700">
+                                                {item.text}
+                                            </span>
+                                        </div>
+                                        <button
+                                            onClick={() => deleteItem(item.id)}
+                                            className="text-gray-400 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition"
+                                            title="Remove item"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                                {items.filter(i => !i.checked).length === 0 && items.length > 0 && (
+                                    <div className="text-center py-8 text-gray-400 italic">
+                                        All items packed! 🎉
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        {/* Completed Items */}
-                        {items.some(i => i.checked) && (
-                            <div className="mt-8">
-                                <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3 pl-2">Packed & Ready</h3>
-                                <div className="space-y-2 opacity-60">
-                                    {items.filter(i => i.checked).map(item => (
+                        {/* Column 2: Completed Items */}
+                        <div className="space-y-4">
+                            <h3 className="font-bold text-gray-400 flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                                Packed & Ready
+                            </h3>
+
+                            <div className="space-y-2 opacity-80">
+                                {items.filter(i => i.checked).length === 0 && (
+                                    <div className="text-center py-8 text-gray-300 border-2 border-dashed border-gray-50 rounded-xl">
+                                        Nothing packed yet.
+                                    </div>
+                                )}
+                                {items.filter(i => i.checked).map(item => (
+                                    <div
+                                        key={item.id}
+                                        className="flex items-center justify-between p-3 rounded-xl border border-green-100 bg-green-50 transition"
+                                    >
                                         <div
-                                            key={item.id}
-                                            className="flex items-center justify-between p-3 rounded-xl border border-green-100 bg-green-50 transition"
+                                            onClick={() => toggleItem(item.id)}
+                                            className="flex items-center gap-4 cursor-pointer flex-grow"
                                         >
-                                            <div
-                                                onClick={() => toggleItem(item.id)}
-                                                className="flex items-center gap-4 cursor-pointer flex-grow"
-                                            >
-                                                <div className="w-6 h-6 rounded border-2 bg-green-500 border-green-500 flex items-center justify-center text-white">
-                                                    <CheckSquare className="w-4 h-4" />
-                                                </div>
-                                                <span className="font-medium text-green-800 line-through">
-                                                    {item.text}
-                                                </span>
+                                            <div className="w-6 h-6 rounded border-2 bg-green-500 border-green-500 flex items-center justify-center text-white">
+                                                <CheckSquare className="w-4 h-4" />
                                             </div>
-                                            <button
-                                                onClick={() => deleteItem(item.id)}
-                                                className="text-gray-400 hover:text-red-500 p-2 transition"
-                                                title="Remove item"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            <span className="font-medium text-green-800 line-through">
+                                                {item.text}
+                                            </span>
                                         </div>
-                                    ))}
-                                </div>
+                                        <button
+                                            onClick={() => deleteItem(item.id)}
+                                            className="text-gray-400 hover:text-red-500 p-2 transition"
+                                            title="Remove item"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
             </div>
