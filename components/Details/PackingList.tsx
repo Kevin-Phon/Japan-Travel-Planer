@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CheckSquare, Plus, Trash2, Backpack } from 'lucide-react';
+import { CheckSquare, Plus, Trash2, Backpack, ChevronUp, ChevronDown } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 
 interface PackingItem {
@@ -43,6 +43,42 @@ export const PackingList: React.FC = () => {
 
     const deleteItem = (id: string) => {
         setItems(prev => prev.filter(item => item.id !== id));
+    };
+
+    const moveItem = (id: string, direction: 'up' | 'down') => {
+        setItems(prev => {
+            const newItems = [...prev];
+            const currentIndex = newItems.findIndex(i => i.id === id);
+            if (currentIndex === -1) return prev;
+
+            let targetIndex = -1;
+
+            if (direction === 'up') {
+                // Find nearest unchecked item above
+                for (let i = currentIndex - 1; i >= 0; i--) {
+                    if (!newItems[i].checked) {
+                        targetIndex = i;
+                        break;
+                    }
+                }
+            } else {
+                // Find nearest unchecked item below
+                for (let i = currentIndex + 1; i < newItems.length; i++) {
+                    if (!newItems[i].checked) {
+                        targetIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            if (targetIndex !== -1) {
+                // Swap
+                [newItems[currentIndex], newItems[targetIndex]] = [newItems[targetIndex], newItems[currentIndex]];
+                return newItems;
+            }
+
+            return prev;
+        });
     };
 
     const progress = Math.round((items.filter(i => i.checked).length / items.length) * 100) || 0;
@@ -110,7 +146,7 @@ export const PackingList: React.FC = () => {
                             )}
 
                             <div className="space-y-3">
-                                {items.filter(i => !i.checked).map(item => (
+                                {items.filter(i => !i.checked).map((item, index, array) => (
                                     <div
                                         key={item.id}
                                         className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white hover:border-red-200 hover:shadow-sm transition group"
@@ -125,13 +161,32 @@ export const PackingList: React.FC = () => {
                                                 {item.text}
                                             </span>
                                         </div>
-                                        <button
-                                            onClick={() => deleteItem(item.id)}
-                                            className="text-gray-400 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition"
-                                            title="Remove item"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
+
+                                        <div className="flex items-center gap-1">
+                                            <div className="flex flex-col opacity-0 group-hover:opacity-100 transition mr-2">
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); moveItem(item.id, 'up'); }}
+                                                    disabled={index === 0}
+                                                    className="p-1 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:hover:text-gray-400"
+                                                >
+                                                    <ChevronUp className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); moveItem(item.id, 'down'); }}
+                                                    disabled={index === array.length - 1}
+                                                    className="p-1 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:hover:text-gray-400"
+                                                >
+                                                    <ChevronDown className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                            <button
+                                                onClick={() => deleteItem(item.id)}
+                                                className="text-gray-400 hover:text-red-500 p-2 opacity-0 group-hover:opacity-100 transition"
+                                                title="Remove item"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                                 {items.filter(i => !i.checked).length === 0 && items.length > 0 && (
