@@ -7,6 +7,7 @@ import { ItineraryList } from './components/Itinerary/ItineraryList';
 import { BudgetPlanner } from './components/Details/BudgetPlanner';
 import { TravelTips } from './components/Details/TravelTips';
 import { PackingList } from './components/Details/PackingList';
+import { TripDates } from './components/Details/TripDates';
 import { DetailModal } from './components/Modals/DetailModal';
 import { ActivityModal } from './components/Modals/ActivityModal';
 import { AiAssistant } from './components/AiAssistant/AiAssistant';
@@ -121,6 +122,7 @@ const App: React.FC = () => {
 
                 {activeTab === 'details' && (
                     <div className="animate-fade-in space-y-6">
+                        <TripDates />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <BudgetPlanner />
                             <TravelTips />
