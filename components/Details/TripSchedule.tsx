@@ -1,0 +1,185 @@
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
+
+interface TripDatesData {
+    startDate: string;
+    endDate: string;
+}
+
+export const TripSchedule: React.FC = () => {
+    const [dates, setDates] = useLocalStorage<TripDatesData>('trip-dates', { startDate: '', endDate: '' });
+    const [currentMonth, setCurrentMonth] = useState(new Date());
+
+    const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+    const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+
+    const handleDateClick = (day: number) => {
+        const selectedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+        // Adjust for timezone offset to ensure "YYYY-MM-DD" string matches selected day
+        const dateString = new Date(selectedDate.getTime() - (selectedDate.getTimezoneOffset() * 60000))
+            .toISOString().split('T')[0];
+
+        if (!dates.startDate || (dates.startDate && dates.endDate)) {
+            // Start new selection
+            setDates({ startDate: dateString, endDate: '' });
+        } else {
+            // Complete selection
+            const start = new Date(dates.startDate);
+            const selected = new Date(dateString);
+
+            if (selected < start) {
+                // If clicked date is before start, make it the new start
+                setDates({ startDate: dateString, endDate: '' });
+            } else {
+                setDates(prev => ({ ...prev, endDate: dateString }));
+            }
+        }
+    };
+
+    const isDateInRange = (day: number) => {
+        if (!dates.startDate || !dates.endDate) return false;
+
+        const current = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+        const start = new Date(dates.startDate);
+        const end = new Date(dates.endDate);
+
+        // Normalize times
+        current.setHours(0, 0, 0, 0);
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0); // Ensure end includes the full day
+
+        return current >= start && current <= end;
+    };
+
+    const isStartDate = (day: number) => {
+        if (!dates.startDate) return false;
+        const current = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+        const start = new Date(dates.startDate);
+        // Normalize times
+        current.setHours(0, 0, 0, 0);
+        start.setHours(0, 0, 0, 0);
+        return current.getTime() === start.getTime();
+    };
+
+    const isEndDate = (day: number) => {
+        if (!dates.endDate) return false;
+        const current = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+        const end = new Date(dates.endDate);
+        // Normalize times
+        current.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+        return current.getTime() === end.getTime();
+    };
+
+    const nextMonth = () => {
+        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+    };
+
+    const prevMonth = () => {
+        setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+    };
+
+    // Calculate duration
+    let duration = 0;
+    if (dates.startDate && dates.endDate) {
+        const start = new Date(dates.startDate);
+        const end = new Date(dates.endDate);
+        const diffTime = Math.abs(end.getTime() - start.getTime());
+        duration = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include start day
+    }
+
+    const renderCalendarDays = () => {
+        const totalDays = daysInMonth(currentMonth);
+        const startDay = firstDayOfMonth(currentMonth);
+        const days = [];
+
+        // Empty cells for previous month
+        for (let i = 0; i < startDay; i++) {
+            days.push(<div key={`empty-${i}`} className="p-4" />);
+        }
+
+        // Days of current month
+        for (let day = 1; day <= totalDays; day++) {
+            const isStart = isStartDate(day);
+            const isEnd = isEndDate(day);
+            const inRange = isDateInRange(day);
+
+            let bgClass = "bg-white hover:bg-gray-50 border-gray-100";
+            let textClass = "text-gray-700";
+
+            if (isStart || isEnd) {
+                bgClass = "bg-red-600 text-white shadow-md transform scale-105 z-10";
+                textClass = "text-white font-bold";
+            } else if (inRange) {
+                bgClass = "bg-red-50 text-red-900";
+            }
+
+            days.push(
+                <button
+                    key={day}
+                    onClick={() => handleDateClick(day)}
+                    className={`relative p-4 h-24 md:h-32 border transition-all duration-200 flex flex-col items-start justify-start group rounded-xl overflow-hidden ${bgClass}`}
+                >
+                    <span className={`text-sm md:text-lg font-medium ${textClass}`}>{day}</span>
+                    {isStart && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm">Start</span>}
+                    {isEnd && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm">End</span>}
+                </button>
+            );
+        }
+        return days;
+    };
+
+    return (
+        <div className="animate-fade-in space-y-6">
+            {/* Header / Stats */}
+            <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <h2 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                        <CalendarIcon className="w-8 h-8 text-red-600" />
+                        Trip Schedule
+                    </h2>
+                    <p className="text-gray-500 mt-1">Select your start and end dates to plan your adventure.</p>
+                </div>
+
+                {dates.startDate && dates.endDate && (
+                    <div className="flex gap-4">
+                        <div className="bg-red-50 px-6 py-3 rounded-2xl border border-red-100 text-center">
+                            <div className="text-xs text-red-400 uppercase font-bold tracking-wider">Duration</div>
+                            <div className="text-2xl font-black text-red-600">{duration} Days</div>
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Calendar Controls */}
+            <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-gray-100">
+                <div className="p-6 flex items-center justify-between border-b border-gray-100">
+                    <button onClick={prevMonth} className="p-2 hover:bg-gray-100 rounded-full transition text-gray-600">
+                        <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <h3 className="text-xl font-bold text-gray-800">
+                        {currentMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </h3>
+                    <button onClick={nextMonth} className="p-2 hover:bg-gray-100 rounded-full transition text-gray-600">
+                        <ChevronRight className="w-6 h-6" />
+                    </button>
+                </div>
+
+                {/* Weekday Headers */}
+                <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                        <div key={day} className="p-4 text-center text-sm font-bold text-gray-400 uppercase tracking-wider">
+                            {day}
+                        </div>
+                    ))}
+                </div>
+
+                {/* Calendar Grid */}
+                <div className="grid grid-cols-7 bg-white">
+                    {renderCalendarDays()}
+                </div>
+            </div>
+        </div>
+    );
+};

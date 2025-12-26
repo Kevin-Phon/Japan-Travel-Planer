@@ -1,5 +1,5 @@
 import React from 'react';
-import { Landmark, Utensils, Wallet, Backpack } from 'lucide-react';
+import { Landmark, Utensils, Wallet, Backpack, Calendar } from 'lucide-react';
 import { TabType } from '../../types';
 
 interface NavigationProps {
@@ -17,8 +17,8 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab 
   };
 
   return (
-    <nav className="sticky top-0 z-40 bg-white shadow-sm">
-      <div className="max-w-4xl mx-auto flex justify-around md:justify-center md:gap-12">
+    <nav className="sticky top-0 z-40 bg-white shadow-sm overflow-x-auto">
+      <div className="max-w-4xl mx-auto flex justify-start md:justify-center md:gap-12 min-w-max px-4">
         <button onClick={() => setActiveTab('kyoto')} className={getTabClass('kyoto')}>
           <Landmark className="w-5 h-5" />
           <span>Kyoto (Days 1-15)</span>
@@ -32,8 +32,12 @@ export const Navigation: React.FC<NavigationProps> = ({ activeTab, setActiveTab 
           <span>Budget & Tips</span>
         </button>
         <button onClick={() => setActiveTab('checklist')} className={getTabClass('checklist')}>
-          <Backpack className="w-5 h-5" />
-          <span>Checklist</span>
+          <Backpack className={`w-5 h-5 ${activeTab === 'checklist' ? 'animate-bounce-subtle' : ''}`} />
+          <span>Packing</span>
+        </button>
+        <button onClick={() => setActiveTab('schedule')} className={getTabClass('schedule')}>
+          <Calendar className={`w-5 h-5 ${activeTab === 'schedule' ? 'animate-bounce-subtle' : ''}`} />
+          <span>Schedule</span>
         </button>
       </div>
     </nav>

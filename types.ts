@@ -39,7 +39,7 @@ export interface Tip {
   text: string;
 }
 
-export type TabType = 'kyoto' | 'fukuoka' | 'details' | 'checklist';
+export type TabType = 'kyoto' | 'fukuoka' | 'details' | 'checklist' | 'schedule';
 
 export interface ChatMessage {
   role: 'user' | 'ai';

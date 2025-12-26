@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import { Header } from './components/Layout/Header';
@@ -7,7 +6,7 @@ import { ItineraryList } from './components/Itinerary/ItineraryList';
 import { BudgetPlanner } from './components/Details/BudgetPlanner';
 import { TravelTips } from './components/Details/TravelTips';
 import { PackingList } from './components/Details/PackingList';
-import { TripDates } from './components/Details/TripDates';
+import { TripSchedule } from './components/Details/TripSchedule';
 import { DetailModal } from './components/Modals/DetailModal';
 import { ActivityModal } from './components/Modals/ActivityModal';
 import { AiAssistant } from './components/AiAssistant/AiAssistant';
@@ -122,7 +121,6 @@ const App: React.FC = () => {
 
                 {activeTab === 'details' && (
                     <div className="animate-fade-in space-y-6">
-                        <TripDates />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <BudgetPlanner />
                             <TravelTips />
@@ -152,11 +150,13 @@ const App: React.FC = () => {
                     </div >
                 )}
 
-                {
-                    activeTab === 'checklist' && (
-                        <PackingList />
-                    )
-                }
+                {activeTab === 'checklist' && (
+                    <PackingList />
+                )}
+
+                {activeTab === 'schedule' && (
+                    <TripSchedule />
+                )}
             </main >
 
             <footer className="bg-gray-800 text-gray-400 py-8 text-center mt-auto">
