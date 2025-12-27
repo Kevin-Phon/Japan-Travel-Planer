@@ -1,14 +1,6 @@
-
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from 'lucide-react';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
-
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
 import { ItineraryItem } from '../../types';
-
-interface TripDatesData {
-    startDate: string;
-    endDate: string;
-}
 
 interface TripScheduleProps {
     items?: ItineraryItem[];
@@ -22,74 +14,21 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
         return new Date(y, m - 1, d);
     };
 
-    const [dates, setDates] = useLocalStorage<TripDatesData>('trip-dates', { startDate: '', endDate: '' });
-
-    // Initialize calendar to start date if exists, otherwise today
+    // Initialize calendar to start date based on the earliest item, otherwise today
     const [currentMonth, setCurrentMonth] = useState(() => {
-        if (dates.startDate) return parseLocalYMD(dates.startDate);
+        const datedItems = items.filter(i => i.date).sort((a, b) => {
+            // Simple string compare works for YYYY-MM-DD
+            return (a.date || '').localeCompare(b.date || '');
+        });
+
+        if (datedItems.length > 0 && datedItems[0].date) {
+            return parseLocalYMD(datedItems[0].date);
+        }
         return new Date();
     });
 
     const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-
-    const handleDateClick = (day: number) => {
-        const selectedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-        // Adjust for timezone offset to ensure "YYYY-MM-DD" string matches selected day
-        const dateString = new Date(selectedDate.getTime() - (selectedDate.getTimezoneOffset() * 60000))
-            .toISOString().split('T')[0];
-
-        if (!dates.startDate || (dates.startDate && dates.endDate)) {
-            // Start new selection
-            setDates({ startDate: dateString, endDate: '' });
-        } else {
-            // Complete selection
-            const start = new Date(dates.startDate);
-            const selected = new Date(dateString);
-
-            if (selected < start) {
-                // If clicked date is before start, make it the new start
-                setDates({ startDate: dateString, endDate: '' });
-            } else {
-                setDates(prev => ({ ...prev, endDate: dateString }));
-            }
-        }
-    };
-
-    const isDateInRange = (day: number) => {
-        if (!dates.startDate || !dates.endDate) return false;
-
-        const current = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-        const start = new Date(dates.startDate);
-        const end = new Date(dates.endDate);
-
-        // Normalize times
-        current.setHours(0, 0, 0, 0);
-        start.setHours(0, 0, 0, 0);
-        end.setHours(0, 0, 0, 0); // Ensure end includes the full day
-
-        return current >= start && current <= end;
-    };
-
-    const isStartDate = (day: number) => {
-        if (!dates.startDate) return false;
-        const current = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-        const start = new Date(dates.startDate);
-        // Normalize times
-        current.setHours(0, 0, 0, 0);
-        start.setHours(0, 0, 0, 0);
-        return current.getTime() === start.getTime();
-    };
-
-    const isEndDate = (day: number) => {
-        if (!dates.endDate) return false;
-        const current = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-        const end = new Date(dates.endDate);
-        // Normalize times
-        current.setHours(0, 0, 0, 0);
-        end.setHours(0, 0, 0, 0);
-        return current.getTime() === end.getTime();
-    };
 
     const getItemsForDay = (day: number) => {
         const current = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
@@ -110,15 +49,6 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
     };
 
-    // Calculate duration
-    let duration = 0;
-    if (dates.startDate && dates.endDate) {
-        const start = new Date(dates.startDate);
-        const end = new Date(dates.endDate);
-        const diffTime = Math.abs(end.getTime() - start.getTime());
-        duration = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include start day
-    }
-
     const renderCalendarDays = () => {
         const totalDays = daysInMonth(currentMonth);
         const startDay = firstDayOfMonth(currentMonth);
@@ -126,30 +56,30 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
 
         // Empty cells for previous month
         for (let i = 0; i < startDay; i++) {
-            days.push(<div key={`empty - ${i} `} className="p-4" />);
+            days.push(<div key={`empty-${i}`} className="p-4" />);
         }
 
         // Days of current month
         for (let day = 1; day <= totalDays; day++) {
-            const isStart = isStartDate(day);
-            const isEnd = isEndDate(day);
-            const inRange = isDateInRange(day);
             const dayItems = getItemsForDay(day);
 
             let bgClass = "bg-white hover:bg-gray-50 border-gray-100";
             let textClass = "text-gray-700";
 
-            if (isStart || isEnd) {
-                bgClass = "bg-red-600 text-white shadow-md transform scale-105 z-10";
-                textClass = "text-white font-bold";
-            } else if (inRange) {
-                bgClass = "bg-red-50 text-red-900";
+            // Highlight today
+            const today = new Date();
+            const isToday = today.getDate() === day &&
+                today.getMonth() === currentMonth.getMonth() &&
+                today.getFullYear() === currentMonth.getFullYear();
+
+            if (isToday) {
+                bgClass = "bg-red-50 border-red-100";
+                textClass = "text-red-700 font-bold";
             }
 
             days.push(
-                <button
+                <div
                     key={day}
-                    onClick={() => handleDateClick(day)}
                     className={`relative p-2 h-auto min-h-[8rem] md:min-h-[10rem] border transition-all duration-200 flex flex-col items-start justify-start group rounded-xl overflow-hidden ${bgClass}`}
                 >
                     <span className={`text-sm md:text-lg font-medium mb-1 ${textClass}`}>{day}</span>
@@ -157,16 +87,13 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
                     {/* Items Indicators */}
                     <div className="w-full flex flex-col gap-1 z-20">
                         {dayItems.map((item, idx) => (
-                            <div key={idx} className={`text-xs text-left w-full px-1.5 py-1 rounded leading-tight ${isStart || isEnd ? 'bg-white/20 text-white' : 'bg-red-100 text-red-900 font-medium'}`}>
+                            <div key={idx} className="text-xs text-left w-full px-1.5 py-1 rounded leading-tight bg-red-100 text-red-900 font-medium hover:bg-red-200 transition-colors">
                                 {(item.time && typeof item.time === 'string') ? <span className="block opacity-75 text-[10px] mb-0.5">{item.time.split(' ')[0]}</span> : null}
                                 {item.title}
                             </div>
                         ))}
                     </div>
-
-                    {isStart && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm self-end absolute bottom-2 right-2">Start</span>}
-                    {isEnd && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm self-end absolute bottom-2 right-2">End</span>}
-                </button>
+                </div>
             );
         }
         return days;
@@ -181,17 +108,8 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
                         <CalendarIcon className="w-8 h-8 text-red-600" />
                         Trip Schedule
                     </h2>
-                    <p className="text-gray-500 mt-1">Select your start and end dates to plan your adventure.</p>
+                    <p className="text-gray-500 mt-1"> Overview of all your scheduled activities.</p>
                 </div>
-
-                {dates.startDate && dates.endDate && (
-                    <div className="flex gap-4">
-                        <div className="bg-red-50 px-6 py-3 rounded-2xl border border-red-100 text-center">
-                            <div className="text-xs text-red-400 uppercase font-bold tracking-wider">Duration</div>
-                            <div className="text-2xl font-black text-red-600">{duration} Days</div>
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Calendar Controls */}
