@@ -15,8 +15,20 @@ interface TripScheduleProps {
 }
 
 export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
+    // Safe date parsing to avoid timezone issues (treats YYYY-MM-DD as local wall-clock time)
+    const parseLocalYMD = (dateStr: string) => {
+        if (!dateStr) return new Date();
+        const [y, m, d] = dateStr.split('-').map(Number);
+        return new Date(y, m - 1, d);
+    };
+
     const [dates, setDates] = useLocalStorage<TripDatesData>('trip-dates', { startDate: '', endDate: '' });
-    const [currentMonth, setCurrentMonth] = useState(new Date());
+
+    // Initialize calendar to start date if exists, otherwise today
+    const [currentMonth, setCurrentMonth] = useState(() => {
+        if (dates.startDate) return parseLocalYMD(dates.startDate);
+        return new Date();
+    });
 
     const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     const firstDayOfMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
@@ -212,6 +224,25 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
                 {/* Calendar Grid */}
                 <div className="grid grid-cols-7 bg-white">
                     {renderCalendarDays()}
+                </div>
+            </div>
+
+            {/* Debug Section - To be removed after verification */}
+            <div className="mt-8 p-6 bg-gray-100 rounded-xl border border-gray-200">
+                <h3 className="font-bold text-gray-700 mb-2">Scheduled Items List (Debug)</h3>
+                <p className="text-sm text-gray-500 mb-4">If your item is here, it is saved. Check if the date matches the calendar month above.</p>
+                <div className="space-y-2">
+                    {items.filter(i => i.date).length === 0 ? (
+                        <p className="text-gray-400 italic">No items have dates assigned yet.</p>
+                    ) : (
+                        items.filter(i => i.date).map((item, idx) => (
+                            <div key={idx} className="flex items-center gap-4 bg-white p-2 rounded border border-gray-200 text-sm">
+                                <span className="font-mono font-bold text-red-600">{item.date}</span>
+                                <span className="font-medium text-gray-800">{item.title}</span>
+                                <span className="text-gray-400 text-xs">Phase: {'day' in item ? 'Itinerary' : 'Unknown'}</span>
+                            </div>
+                        ))
+                    )}
                 </div>
             </div>
         </div>
