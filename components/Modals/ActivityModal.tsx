@@ -66,87 +66,98 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({ isOpen, onClose, o
                                     className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Date (Optional)</label>
-                                <input
-                                    type="date"
-                                    value={formData.date || ''}
-                                    onChange={e => handleChange('date', e.target.value)}
-                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none text-gray-600"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                                <input
-                                    type="text"
-                                    value={formData.time || ''}
-                                    onChange={e => handleChange('time', e.target.value)}
-                                    placeholder="e.g. 17:00 - 20:00"
-                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
-                                />
-                            </div>
                         </div>
-
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                            <input
+                                type="date"
+                                value={formData.date || ''}
+                                onChange={e => handleChange('date', e.target.value)}
+                                className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none text-gray-600"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">End Date (Optional)</label>
+                            <input
+                                type="date"
+                                value={formData.endDate || ''}
+                                onChange={e => handleChange('endDate', e.target.value)}
+                                min={formData.date}
+                                className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none text-gray-600"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
                             <input
                                 type="text"
-                                value={formData.title || ''}
-                                onChange={e => handleChange('title', e.target.value)}
+                                value={formData.time || ''}
+                                onChange={e => handleChange('time', e.target.value)}
+                                placeholder="e.g. 17:00 - 20:00"
                                 className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
                             />
                         </div>
+                    </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                            <textarea
-                                rows={3}
-                                value={formData.description || ''}
-                                onChange={e => handleChange('description', e.target.value)}
-                                className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
-                            />
-                        </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                        <input
+                            type="text"
+                            value={formData.title || ''}
+                            onChange={e => handleChange('title', e.target.value)}
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
+                        />
+                    </div>
 
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea
+                            rows={3}
+                            value={formData.description || ''}
+                            onChange={e => handleChange('description', e.target.value)}
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                        <input
+                            type="text"
+                            value={formData.image || ''}
+                            onChange={e => handleChange('image', e.target.value)}
+                            placeholder="https://..."
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Cost Details</label>
                             <input
                                 type="text"
-                                value={formData.image || ''}
-                                onChange={e => handleChange('image', e.target.value)}
-                                placeholder="https://..."
+                                value={formData.cost || ''}
+                                onChange={e => handleChange('cost', e.target.value)}
+                                placeholder="e.g. Free or ¥500"
                                 className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
                             />
                         </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Cost Details</label>
-                                <input
-                                    type="text"
-                                    value={formData.cost || ''}
-                                    onChange={e => handleChange('cost', e.target.value)}
-                                    placeholder="e.g. Free or ¥500"
-                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Location for Map</label>
-                                <input
-                                    type="text"
-                                    value={decodeURIComponent(formData.mapQuery || '').replace(/\+/g, ' ')}
-                                    onChange={e => handleChange('mapQuery', encodeURIComponent(e.target.value))}
-                                    placeholder="e.g. Gion District"
-                                    className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
-                                />
-                            </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Location for Map</label>
+                            <input
+                                type="text"
+                                value={decodeURIComponent(formData.mapQuery || '').replace(/\+/g, ' ')}
+                                onChange={e => handleChange('mapQuery', encodeURIComponent(e.target.value))}
+                                placeholder="e.g. Gion District"
+                                className="w-full p-2 border rounded focus:ring-2 focus:ring-red-200 outline-none"
+                            />
                         </div>
                     </div>
                 </div>
-                <div className="p-4 border-t bg-gray-50 flex justify-end gap-2">
-                    <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded">Cancel</button>
-                    <button onClick={handleSave} className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded font-bold">Save Changes</button>
-                </div>
+            </div>
+            <div className="p-4 border-t bg-gray-50 flex justify-end gap-2">
+                <button onClick={onClose} className="px-4 py-2 text-gray-600 hover:bg-gray-200 rounded">Cancel</button>
+                <button onClick={handleSave} className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded font-bold">Save Changes</button>
             </div>
         </div>
+        </div >
     );
 };

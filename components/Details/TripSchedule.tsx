@@ -36,9 +36,19 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
         const year = current.getFullYear();
         const month = String(current.getMonth() + 1).padStart(2, '0');
         const dayStr = String(day).padStart(2, '0');
-        const dateString = `${year}-${month}-${dayStr}`;
+        const loopDateStr = `${year}-${month}-${dayStr}`;
 
-        return items.filter(item => item.date === dateString);
+        return items.filter(item => {
+            if (!item.date) return false;
+
+            // If single date
+            if (!item.endDate) {
+                return item.date === loopDateStr;
+            }
+
+            // If range
+            return loopDateStr >= item.date && loopDateStr <= item.endDate;
+        });
     };
 
     const nextMonth = () => {
