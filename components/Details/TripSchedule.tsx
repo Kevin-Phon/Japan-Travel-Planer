@@ -150,26 +150,22 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
                 <button
                     key={day}
                     onClick={() => handleDateClick(day)}
-                    className={`relative p - 2 md: p - 4 h - 24 md: h - 32 border transition - all duration - 200 flex flex - col items - start justify - start group rounded - xl overflow - hidden ${bgClass} `}
+                    className={`relative p-2 h-auto min-h-[8rem] md:min-h-[10rem] border transition-all duration-200 flex flex-col items-start justify-start group rounded-xl overflow-hidden ${bgClass}`}
                 >
-                    <span className={`text - sm md: text - lg font - medium ${textClass} `}>{day}</span>
+                    <span className={`text-sm md:text-lg font-medium mb-1 ${textClass}`}>{day}</span>
 
                     {/* Items Indicators */}
-                    <div className="mt-1 w-full flex flex-col gap-1 overflow-hidden">
-                        {dayItems.slice(0, 3).map((item, idx) => (
-                            <div key={idx} className={`text - [10px] truncate w - full px - 1.5 py - 0.5 rounded ${isStart || isEnd ? 'bg-white/20 text-white' : 'bg-red-100 text-red-800'} `}>
-                                {item.time ? `${item.time.split(' ')[0]} ` : ''}{item.title}
+                    <div className="w-full flex flex-col gap-1 z-20">
+                        {dayItems.map((item, idx) => (
+                            <div key={idx} className={`text-xs text-left w-full px-1.5 py-1 rounded leading-tight ${isStart || isEnd ? 'bg-white/20 text-white' : 'bg-red-100 text-red-900 font-medium'}`}>
+                                {(item.time && typeof item.time === 'string') ? <span className="block opacity-75 text-[10px] mb-0.5">{item.time.split(' ')[0]}</span> : null}
+                                {item.title}
                             </div>
                         ))}
-                        {dayItems.length > 3 && (
-                            <div className={`text - [10px] px - 1 ${isStart || isEnd ? 'text-white/80' : 'text-gray-400'} `}>
-                                +{dayItems.length - 3} more
-                            </div>
-                        )}
                     </div>
 
-                    {isStart && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm self-end">Start</span>}
-                    {isEnd && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm self-end">End</span>}
+                    {isStart && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm self-end absolute bottom-2 right-2">Start</span>}
+                    {isEnd && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm self-end absolute bottom-2 right-2">End</span>}
                 </button>
             );
         }
@@ -224,25 +220,6 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
                 {/* Calendar Grid */}
                 <div className="grid grid-cols-7 bg-white">
                     {renderCalendarDays()}
-                </div>
-            </div>
-
-            {/* Debug Section - To be removed after verification */}
-            <div className="mt-8 p-6 bg-gray-100 rounded-xl border border-gray-200">
-                <h3 className="font-bold text-gray-700 mb-2">Scheduled Items List (Debug)</h3>
-                <p className="text-sm text-gray-500 mb-4">If your item is here, it is saved. Check if the date matches the calendar month above.</p>
-                <div className="space-y-2">
-                    {items.filter(i => i.date).length === 0 ? (
-                        <p className="text-gray-400 italic">No items have dates assigned yet.</p>
-                    ) : (
-                        items.filter(i => i.date).map((item, idx) => (
-                            <div key={idx} className="flex items-center gap-4 bg-white p-2 rounded border border-gray-200 text-sm">
-                                <span className="font-mono font-bold text-red-600">{item.date}</span>
-                                <span className="font-medium text-gray-800">{item.title}</span>
-                                <span className="text-gray-400 text-xs">Phase: {'day' in item ? 'Itinerary' : 'Unknown'}</span>
-                            </div>
-                        ))
-                    )}
                 </div>
             </div>
         </div>
