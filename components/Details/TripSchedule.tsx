@@ -1,13 +1,20 @@
+
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock } from 'lucide-react';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
+
+import { ItineraryItem } from '../../types';
 
 interface TripDatesData {
     startDate: string;
     endDate: string;
 }
 
-export const TripSchedule: React.FC = () => {
+interface TripScheduleProps {
+    items?: ItineraryItem[];
+}
+
+export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
     const [dates, setDates] = useLocalStorage<TripDatesData>('trip-dates', { startDate: '', endDate: '' });
     const [currentMonth, setCurrentMonth] = useState(new Date());
 
@@ -72,6 +79,15 @@ export const TripSchedule: React.FC = () => {
         return current.getTime() === end.getTime();
     };
 
+    const getItemsForDay = (day: number) => {
+        const current = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+        // Normalize to YYYY-MM-DD
+        const dateString = new Date(current.getTime() - (current.getTimezoneOffset() * 60000))
+            .toISOString().split('T')[0];
+
+        return items.filter(item => item.date === dateString);
+    };
+
     const nextMonth = () => {
         setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
     };
@@ -96,7 +112,7 @@ export const TripSchedule: React.FC = () => {
 
         // Empty cells for previous month
         for (let i = 0; i < startDay; i++) {
-            days.push(<div key={`empty-${i}`} className="p-4" />);
+            days.push(<div key={`empty - ${i} `} className="p-4" />);
         }
 
         // Days of current month
@@ -104,6 +120,7 @@ export const TripSchedule: React.FC = () => {
             const isStart = isStartDate(day);
             const isEnd = isEndDate(day);
             const inRange = isDateInRange(day);
+            const dayItems = getItemsForDay(day);
 
             let bgClass = "bg-white hover:bg-gray-50 border-gray-100";
             let textClass = "text-gray-700";
@@ -119,11 +136,26 @@ export const TripSchedule: React.FC = () => {
                 <button
                     key={day}
                     onClick={() => handleDateClick(day)}
-                    className={`relative p-4 h-24 md:h-32 border transition-all duration-200 flex flex-col items-start justify-start group rounded-xl overflow-hidden ${bgClass}`}
+                    className={`relative p - 2 md: p - 4 h - 24 md: h - 32 border transition - all duration - 200 flex flex - col items - start justify - start group rounded - xl overflow - hidden ${bgClass} `}
                 >
-                    <span className={`text-sm md:text-lg font-medium ${textClass}`}>{day}</span>
-                    {isStart && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm">Start</span>}
-                    {isEnd && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm">End</span>}
+                    <span className={`text - sm md: text - lg font - medium ${textClass} `}>{day}</span>
+
+                    {/* Items Indicators */}
+                    <div className="mt-1 w-full flex flex-col gap-1 overflow-hidden">
+                        {dayItems.slice(0, 3).map((item, idx) => (
+                            <div key={idx} className={`text - [10px] truncate w - full px - 1.5 py - 0.5 rounded ${isStart || isEnd ? 'bg-white/20 text-white' : 'bg-red-100 text-red-800'} `}>
+                                {item.time ? `${item.time.split(' ')[0]} ` : ''}{item.title}
+                            </div>
+                        ))}
+                        {dayItems.length > 3 && (
+                            <div className={`text - [10px] px - 1 ${isStart || isEnd ? 'text-white/80' : 'text-gray-400'} `}>
+                                +{dayItems.length - 3} more
+                            </div>
+                        )}
+                    </div>
+
+                    {isStart && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm self-end">Start</span>}
+                    {isEnd && <span className="mt-auto text-xs bg-white text-red-600 px-2 py-0.5 rounded-full font-bold shadow-sm self-end">End</span>}
                 </button>
             );
         }

@@ -155,7 +155,7 @@ const App: React.FC = () => {
                 )}
 
                 {activeTab === 'schedule' && (
-                    <TripSchedule />
+                    <TripSchedule items={[...kyotoItems, ...fukuokaItems]} />
                 )}
             </main >
 

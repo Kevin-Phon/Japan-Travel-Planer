@@ -1,6 +1,7 @@
 export interface ItineraryItem {
   id: string;
   day: string;
+  date?: string; // YYYY-MM-DD
   title: string;
   time: string;
   description: string;
