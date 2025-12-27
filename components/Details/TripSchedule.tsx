@@ -81,9 +81,11 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
 
     const getItemsForDay = (day: number) => {
         const current = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
-        // Normalize to YYYY-MM-DD
-        const dateString = new Date(current.getTime() - (current.getTimezoneOffset() * 60000))
-            .toISOString().split('T')[0];
+        // Create date string manually to avoid timezone shifting issues
+        const year = current.getFullYear();
+        const month = String(current.getMonth() + 1).padStart(2, '0');
+        const dayStr = String(day).padStart(2, '0');
+        const dateString = `${year}-${month}-${dayStr}`;
 
         return items.filter(item => item.date === dateString);
     };
