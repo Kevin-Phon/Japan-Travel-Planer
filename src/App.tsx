@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
+import { useSupabaseItinerary } from './hooks/useSupabaseItinerary';
 import { Header } from './components/Layout/Header';
 import { Navigation } from './components/Layout/Navigation';
 import { ItineraryList } from './components/Itinerary/ItineraryList';
@@ -16,8 +17,22 @@ import { Plane, Calendar, MapPin, MessageCircle, Wallet, Backpack } from 'lucide
 
 const App: React.FC = () => {
     const [activeTab, setActiveTab] = useState<TabType>('kyoto');
-    const [kyotoItems, setKyotoItems] = useLocalStorage<ItineraryItem[]>('kyoto-items', initialKyotoData);
-    const [fukuokaItems, setFukuokaItems] = useLocalStorage<ItineraryItem[]>('fukuoka-items', initialFukuokaData);
+
+    const {
+        items: kyotoItems,
+        addItem: addKyoto,
+        deleteItem: deleteKyoto,
+        updateItem: updateKyoto,
+        seedData: seedKyoto
+    } = useSupabaseItinerary('kyoto', initialKyotoData);
+
+    const {
+        items: fukuokaItems,
+        addItem: addFukuoka,
+        deleteItem: deleteFukuoka,
+        updateItem: updateFukuoka,
+        seedData: seedFukuoka
+    } = useSupabaseItinerary('fukuoka', initialFukuokaData);
 
     // Modal States
     const [detailItem, setDetailItem] = useState<ItineraryItem | null>(null);
@@ -28,9 +43,9 @@ const App: React.FC = () => {
     // Logic to handle deleting items
     const handleDelete = (id: string, phase: 'kyoto' | 'fukuoka') => {
         if (phase === 'kyoto') {
-            setKyotoItems(prev => prev.filter(i => i.id !== id));
+            deleteKyoto(id);
         } else {
-            setFukuokaItems(prev => prev.filter(i => i.id !== id));
+            deleteFukuoka(id);
         }
     };
 
@@ -48,32 +63,36 @@ const App: React.FC = () => {
 
     // Logic to save (add/edit) item
     const handleSaveActivity = (itemData: Partial<ItineraryItem>) => {
-        const listSetter = editPhase === 'kyoto' ? setKyotoItems : setFukuokaItems;
+        const isKyoto = editPhase === 'kyoto';
 
-        listSetter(prev => {
-            if (editItem) {
-                // Update existing
-                return prev.map(i => i.id === editItem.id ? { ...i, ...itemData } as ItineraryItem : i);
-            } else {
-                // Add new
-                const newItem = {
-                    ...itemData,
-                    id: Date.now().toString(),
-                    hiddenGemId: `gem - ${Date.now()} `
-                } as ItineraryItem;
-                // Simple sort by day if possible (naive check)
-                const newList = [...prev, newItem];
-                return newList.sort((a, b) => parseInt(a.day) - parseInt(b.day));
-            }
-        });
+        if (editItem) {
+            // Update existing
+            const updated = { ...editItem, ...itemData } as ItineraryItem;
+            isKyoto ? updateKyoto(updated) : updateFukuoka(updated);
+        } else {
+            // Add new
+            const newItem = {
+                ...itemData,
+                id: crypto.randomUUID(), // Generate UUID for Supabase
+                hiddenGemId: `gem-${Date.now()}`
+            } as ItineraryItem;
+
+            isKyoto ? addKyoto(newItem) : addFukuoka(newItem);
+        }
     };
 
     // Logic to update details from detailed view
     const handleDetailUpdate = (updatedItem: ItineraryItem) => {
-        // Update in the main lists
-        const updater = (list: ItineraryItem[]) => list.map(i => i.id === updatedItem.id ? updatedItem : i);
-        setKyotoItems(updater);
-        setFukuokaItems(updater);
+        // We need to know which list it belongs to. 
+        // Naive check: try to find it in kyoto, if not assume fukuoka (or try both updates, harmless if ID doesn't exist? Supabase upsert creates if not exists... wait.)
+        // Supabase upsert will create if ID not found. We don't want to move items between lists accidentally.
+        // Let's check memory state.
+        const isKyoto = kyotoItems.some(i => i.id === updatedItem.id);
+        if (isKyoto) {
+            updateKyoto(updatedItem);
+        } else {
+            updateFukuoka(updatedItem);
+        }
         setDetailItem(updatedItem); // Update the currently open modal data
     };
 
@@ -84,39 +103,65 @@ const App: React.FC = () => {
 
             <main className="flex-grow max-w-5xl mx-auto w-full p-6 pb-20">
                 {activeTab === 'kyoto' && (
-                    <ItineraryList
-                        phase="Kyoto"
-                        title="Phase 1: The Ancient Capital"
-                        subtitle="Experience the heart of traditional Japan. Temples, nature, and history."
-                        items={kyotoItems}
-                        onEdit={(id) => handleOpenEdit('kyoto', id)}
-                        onDelete={(id) => handleDelete(id, 'kyoto')}
-                        onViewDetails={setDetailItem}
-                        onAddNew={() => handleOpenEdit('kyoto')}
-                        stats={[
-                            { label: 'Stay', value: 'Gion or Kawaramachi', color: 'red' },
-                            { label: 'Must Eat', value: 'Kaiseki, Yudofu, Matcha', color: 'orange' },
-                            { label: 'Transport', value: 'Bus & Walking', color: 'blue' }
-                        ]}
-                    />
+                    <>
+                        {kyotoItems.length === 0 && (
+                            <div className="text-center p-8 bg-white rounded-xl border-dashed border-2 border-gray-200 mb-6">
+                                <p className="text-gray-500 mb-4">Database is empty.</p>
+                                <button
+                                    onClick={seedKyoto}
+                                    className="px-6 py-2 bg-red-100 text-red-600 rounded-full font-bold hover:bg-red-200 transition"
+                                >
+                                    Load Default Kyoto Itinerary
+                                </button>
+                            </div>
+                        )}
+                        <ItineraryList
+                            phase="Kyoto"
+                            title="Phase 1: The Ancient Capital"
+                            subtitle="Experience the heart of traditional Japan. Temples, nature, and history."
+                            items={kyotoItems}
+                            onEdit={(id) => handleOpenEdit('kyoto', id)}
+                            onDelete={(id) => handleDelete(id, 'kyoto')}
+                            onViewDetails={setDetailItem}
+                            onAddNew={() => handleOpenEdit('kyoto')}
+                            stats={[
+                                { label: 'Stay', value: 'Gion or Kawaramachi', color: 'red' },
+                                { label: 'Must Eat', value: 'Kaiseki, Yudofu, Matcha', color: 'orange' },
+                                { label: 'Transport', value: 'Bus & Walking', color: 'blue' }
+                            ]}
+                        />
+                    </>
                 )}
 
                 {activeTab === 'fukuoka' && (
-                    <ItineraryList
-                        phase="Fukuoka"
-                        title="Phase 2: The Gateway to Asia"
-                        subtitle="Culinary capital, modern cityscapes, and Kyushu adventures."
-                        items={fukuokaItems}
-                        onEdit={(id) => handleOpenEdit('fukuoka', id)}
-                        onDelete={(id) => handleDelete(id, 'fukuoka')}
-                        onViewDetails={setDetailItem}
-                        onAddNew={() => handleOpenEdit('fukuoka')}
-                        stats={[
-                            { label: 'Stay', value: 'Hakata or Tenjin', color: 'red' },
-                            { label: 'Must Eat', value: 'Tonkotsu Ramen, Motsunabe', color: 'orange' },
-                            { label: 'Transport', value: 'Subway & Train', color: 'blue' }
-                        ]}
-                    />
+                    <>
+                        {fukuokaItems.length === 0 && (
+                            <div className="text-center p-8 bg-white rounded-xl border-dashed border-2 border-gray-200 mb-6">
+                                <p className="text-gray-500 mb-4">Database is empty.</p>
+                                <button
+                                    onClick={seedFukuoka}
+                                    className="px-6 py-2 bg-blue-100 text-blue-600 rounded-full font-bold hover:bg-blue-200 transition"
+                                >
+                                    Load Default Fukuoka Itinerary
+                                </button>
+                            </div>
+                        )}
+                        <ItineraryList
+                            phase="Fukuoka"
+                            title="Phase 2: The Gateway to Asia"
+                            subtitle="Culinary capital, modern cityscapes, and Kyushu adventures."
+                            items={fukuokaItems}
+                            onEdit={(id) => handleOpenEdit('fukuoka', id)}
+                            onDelete={(id) => handleDelete(id, 'fukuoka')}
+                            onViewDetails={setDetailItem}
+                            onAddNew={() => handleOpenEdit('fukuoka')}
+                            stats={[
+                                { label: 'Stay', value: 'Hakata or Tenjin', color: 'red' },
+                                { label: 'Must Eat', value: 'Tonkotsu Ramen, Motsunabe', color: 'orange' },
+                                { label: 'Transport', value: 'Subway & Train', color: 'blue' }
+                            ]}
+                        />
+                    </>
                 )}
 
                 {activeTab === 'details' && (
