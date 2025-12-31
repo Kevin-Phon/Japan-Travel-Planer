@@ -4,6 +4,7 @@ export const initialKyotoData: ItineraryItem[] = [
   {
     id: 'k1',
     day: '1',
+    date: '2024-04-01',
     title: "Arrival & Gion Exploration",
     time: "17:00 - 20:00",
     description: "Check into your hotel and walk through the historic Geisha district.",
@@ -33,6 +34,7 @@ export const initialKyotoData: ItineraryItem[] = [
   {
     id: 'k2',
     day: '2',
+    date: '2024-04-02',
     title: "Northern Kyoto Highlights",
     time: "09:00 - 15:00",
     description: "Visit the iconic Golden Pavilion followed by the Bamboo Grove.",
@@ -62,6 +64,7 @@ export const initialKyotoData: ItineraryItem[] = [
   {
     id: 'k3',
     day: '3',
+    date: '2024-04-03',
     title: "Fushimi Inari & Nara",
     time: "08:00 - 17:00",
     description: "Early morning hike through torii gates, then a train ride to feed deer.",
@@ -82,7 +85,7 @@ export const initialKyotoData: ItineraryItem[] = [
         img: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80"
       },
       mustDos: [
-        "Walk through the Senbon Torii.",
+        "Walk across the Senbon Torii.",
         "Feed the bowing deer in Nara Park.",
         "See the Great Buddha (Daibutsu) at Todai-ji Temple."
       ]
@@ -91,8 +94,10 @@ export const initialKyotoData: ItineraryItem[] = [
   {
     id: "1766452188178",
     day: "4 - 7",
-    time: "8:00 - 17:00",
+    date: '2024-04-04',
+    endDate: '2024-04-07',
     title: "Beginning of Osaka",
+    time: "8:00 - 17:00",
     description: "Walk around the city and  famous places",
     image: "https://cdn.cheapoguides.com/wp-content/uploads/sites/3/2020/06/osaka-dotonbori-iStock-1138049211-1024x683.jpg",
     cost: "Various",
@@ -119,6 +124,7 @@ export const initialFukuokaData: ItineraryItem[] = [
   {
     id: 'f1',
     day: '16',
+    date: '2024-04-16',
     title: "Arrival & Ramen Hunting",
     time: "18:00 - 22:00",
     description: "Settle in and visit the famous river-side food stalls.",
@@ -148,6 +154,7 @@ export const initialFukuokaData: ItineraryItem[] = [
   {
     id: 'f2',
     day: '17',
+    date: '2024-04-17',
     title: "City Highlights & Seaside",
     time: "10:00 - 17:00",
     description: "Walk around Ohori Park lake and see the sunset from the tower.",

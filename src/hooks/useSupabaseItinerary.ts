@@ -21,28 +21,69 @@ export function useSupabaseItinerary(category: string, initialData: ItineraryIte
             const { data, error } = await supabase
                 .from('itinerary_items')
                 .select('*')
-                .eq('metadata->>category', category); // Filter by category stored in metadata
+                .eq('metadata->>category', category)
+                .order('date', { ascending: true }); // Sort by earliest date first
 
             if (error) {
                 console.error('Error fetching items:', error);
             } else if (data && data.length > 0) {
-                // Map DB structure back to frontend ItineraryItem if needed
-                // Our schema mostly matches, but we need to ensure 'id' and 'metadata' are handled correctly
+            } else if (data && data.length > 0) {
+                // Map DB structure back to frontend ItineraryItem
                 const mappedItems: ItineraryItem[] = data.map(row => ({
+                    // Spread metadata FIRST so that explicit columns overwrite it if conflicts exist
+                    ...row.metadata,
                     ...row,
-                    // If row has extra DB fields, they are fine.
-                    // Use metadata to fill in complex objects if mapped there.
-                    // For now, let's assume flat mapping + metadata reconstruction if needed.
-                    ...row.metadata // Spread metadata back into the object for detail fields if any
+                    mapQuery: row.location_name || row.mapQuery || '', // Fallback to mapQuery if in row (legacy)
+                    image: row.image_url || row.image || '',           // Fallback to image if in row (legacy)
+                    title: row.title,
+                    date: row.date,
+                    endDate: row.end_date, // Map DB snake_case to Frontend camelCase
                 }));
+
+                // Client-side sort to ensure correct order regardless of DB state
+                mappedItems.sort((a, b) => {
+                    const dateA = a.date || '9999-99-99'; // Push null dates to end
+                    const dateB = b.date || '9999-99-99';
+                    if (dateA !== dateB) {
+                        return dateA.localeCompare(dateB);
+                    }
+                    // Secondary sort by time if dates are equal
+                    return (a.time || '').localeCompare(b.time || '');
+                });
+
                 setItems(mappedItems);
             } else {
-                // If DB is empty for this category, keep initial data (or maybe we should upload initial data?)
-                // For now, let's just respect the empty DB state to avoid overwriting user deletions.
-                // But initially, the DB IS empty. We might want to seed it.
+                // DB is empty, auto-seed with initial data if available
                 if (initialData.length > 0) {
-                    // Initial Seed Logic (Optional: triggers only if truly empty)
-                    // setItems(initialData); 
+                    console.log("Auto-seeding initial data for category:", category);
+                    const itemsToInsert = initialData.map(item => ({
+                        id: item.id.length > 30 ? item.id : crypto.randomUUID(),
+                        title: item.title,
+                        date: item.date,
+                        end_date: item.endDate,
+                        day: item.day,
+                        time: item.time,
+                        cost: item.cost,
+                        location_name: item.mapQuery,
+                        image_url: item.image,
+                        description: item.description,
+                        metadata: { category, ...item.details }
+                    }));
+
+                    const { error: insertError } = await supabase.from('itinerary_items').upsert(itemsToInsert);
+
+                    if (insertError) {
+                        console.error('Error auto-seeding data:', insertError);
+                    } else {
+                        // Use the inserted data to update local state immediately
+                        const mappedItems: ItineraryItem[] = itemsToInsert.map(row => ({
+                            ...row, // This row is from itemsToInsert, so it has location_name etc.
+                            mapQuery: row.location_name,
+                            image: row.image_url,
+                            ...row.metadata
+                        } as any));
+                        setItems(mappedItems);
+                    }
                 }
             }
         } catch (err) {
@@ -66,8 +107,6 @@ export function useSupabaseItinerary(category: string, initialData: ItineraryIte
         }
 
         const newItem = { ...item, metadata: { ...item.details, category } };
-        // Clean up fields that might strictly not belong to columns if strict checking is on
-        // But we are using a JS client.
 
         // Prepare payload
         const payload = {
@@ -78,8 +117,8 @@ export function useSupabaseItinerary(category: string, initialData: ItineraryIte
             day: item.day,
             time: item.time,
             cost: item.cost,
-            location_name: item.mapQuery,
-            image_url: item.image,
+            location_name: item.mapQuery, // Ensure mapQuery is saved to location_name
+            image_url: item.image,        // Ensure image is saved to image_url
             description: item.description,
             metadata: { category, ...item.details } // Store details in metadata
         };
