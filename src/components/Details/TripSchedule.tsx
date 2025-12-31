@@ -144,7 +144,8 @@ export const TripSchedule: React.FC<TripScheduleProps> = ({ items = [] }) => {
                     // Logic: Show if Start OR (WeekStart AND NOT (End==Start))
                     // Actually simple check: Is this the first segment displayed THIS week for this item?
                     // Yes, WeekStart is sufficient trigger.
-                    const showTitle = isStart || (isWeekStart && !isEnd) || (isWeekStart && isEnd && item.date !== dateStr);
+                    // Only show title on the strictly first day of the activity
+                    const showTitle = isStart;
 
                     renderSlots.push(
                         <div
